@@ -1,48 +1,110 @@
-var canvas = document.getElementById("draw");
-var ctx = canvas.getContext("2d");
+const canvas = document.getElementById("draw");
+const ctx = canvas.getContext("2d");
 
 // Params
-var field = [300, 300];
-var cellSize = field[0]/3;
-var cell = [
-    [0, 0, 100, 100],
-    [100,0,100,100],
-    [200, 0, 100, 100],
-    [0, 100, 100, 100],
-    [100, 100, 100, 100],
-    [200, 100, 100, 100],
-    [0, 200, 100, 100],
-    [100, 200, 100, 100],
-    [200, 200, 100, 100]
+const cell = [
+    [0, 0],
+    [100,0],
+    [200, 0],
+    [0, 100],
+    [100, 100],
+    [200, 100],
+    [0, 200],
+    [100, 200],
+    [200, 200]
 ];
 
-createCells();
+let user1 = {
+    'name': 'User1',
+    'active': true,
+    'figure': 'cross'
+};
+let user2 = {
+    'name': 'User2',
+    'active': false,
+    'figure': 'nought'
+};
 
+createCells();
 ctx.strokeRect(0,0,300,300);
 
-
-// Support
-function createCells() {
-    for(var i=0; i < cell.length; i++) {
-        var currentCell = cell[i];
-
-        ctx.strokeRect(currentCell[0], currentCell[1], currentCell[2], currentCell[3]);
+function detectCoord(x, y) {
+    for(let i = 0; i < cell.length; i++) {
+        let cellX = cell[i][0],
+            cellY = cell[i][1];
+        if(x >= cellX && x <= cellX + 100 && y >= cellY && y <= cellY + 100) {
+            return i;
+        }
     }
 }
 
-canvas.onmousemove = function(e) {
-    var rect = this.getBoundingClientRect(),
-        x = e.clientX - rect.left,
-        y = e.clientY - rect.top,
-        i = 0, r;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    for(var i=0; i < cell.length; i++) {
-
-        ctx.beginPath();
-        ctx.rect(i.x, i.y, i.w, i.h);
-        ctx.fillStyle = ctx.isPointInPath(x, y) ? "blue":"yellow";
-        ctx.fill();
+function createCells() {
+    for(let i=0; i < cell.length; i++) {
+        let currentCell = cell[i];
+        ctx.strokeRect(currentCell[0], currentCell[1], 100, 100);
     }
-};
+}
+
+function createCross(x, y) {
+    let position = {
+        x: x + 10,
+        y: y + 10
+    };
+    ctx.beginPath();
+    ctx.lineWidth = 10;
+    ctx.strokeStyle = "rgb(255, 0, 0)";
+    ctx.moveTo(position.x, position.y);
+    ctx.lineTo(position.x + 80, position.y + 80);
+    ctx.moveTo(position.x + 80, position.y);
+    ctx.lineTo(position.x, position.y + 80);
+    ctx.stroke();
+}
+
+function createNought(x, y) {
+    let position = {
+        x: x + 50,
+        y: y + 50
+    };
+    ctx.beginPath();
+    ctx.lineWidth = 10;
+    ctx.strokeStyle = "rgb(0, 0, 255)";
+    ctx.arc(position.x, position.y, 40, 0, Math.PI*2);
+    ctx.stroke();
+}
+
+function getMousePos(canvas, evt) {
+    let rect = canvas.getBoundingClientRect();
+    return {
+        x: evt.clientX - rect.left,
+        y: evt.clientY - rect.top
+    };
+}
+function createFigure(index) {
+    let currentUser = user1['active'] ? user1 : user2;
+
+    let currentX = cell[index][0],
+        currentY = cell[index][1];
+
+    if(currentUser.figure == 'cross') {
+        createCross(currentX, currentY);
+
+    } else {
+        createNought(currentX, currentY);
+    }
+
+
+}
+
+canvas.addEventListener('mouseup', function(evt) {
+    let mousePos = getMousePos(canvas, evt);
+    let message = 'Mouse position: ' + mousePos.x + ',' + mousePos.y;
+    //console.info(canvas, message);
+
+    let promise = new Promise(function(resolve, reject){
+        resolve(detectCoord( mousePos.x,  mousePos.y));
+    });
+    promise.then(result => {createFigure(result)}, false);
+}, false);
+
+
+

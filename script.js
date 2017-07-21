@@ -2,7 +2,7 @@ const canvas = document.getElementById("draw");
 const ctx = canvas.getContext("2d");
 
 // Params
-const cell = [
+let cell = [
     [0, 0],
     [100,0],
     [200, 0],
@@ -13,17 +13,18 @@ const cell = [
     [100, 200],
     [200, 200]
 ];
+let map = [];
 
 let user1 = {
     'name': 'User1',
-    'active': true,
     'figure': 'cross'
 };
 let user2 = {
     'name': 'User2',
-    'active': false,
     'figure': 'nought'
 };
+
+let player = user1;
 
 createCells();
 ctx.strokeRect(0,0,300,300);
@@ -80,30 +81,56 @@ function getMousePos(canvas, evt) {
     };
 }
 function createFigure(index) {
-    let currentUser = user1['active'] ? user1 : user2;
 
     let currentX = cell[index][0],
         currentY = cell[index][1];
 
-    if(currentUser.figure == 'cross') {
+    if(player.figure == 'cross') {
         createCross(currentX, currentY);
+        map[index] = 'cross';
 
     } else {
         createNought(currentX, currentY);
+        map[index] = 'nought';
     }
-
-
+    checkLine();
+}
+function changeUser(currentUser) {
+    player = player == user1 ? user2 : user1;
+}
+function checkLine() {
+    let figure = player.figure;
+    if (map[0] == figure && map[1] ==  figure && map[2] ==  figure) {
+        console.log(`${player.name} on ${figure} is winner`);
+    } else if (map[3] == figure && map[4] ==  figure && map[5] ==  figure) {
+        console.log(`${player.name} on ${figure} is winner`);
+    } else if (map[6] == figure && map[7] ==  figure && map[8] ==  figure) {
+        console.log(`${player.name} on ${figure} is winner`);
+    } else if (map[0] == figure && map[3] ==  figure && map[6] ==  figure) {
+        console.log(`${player.name} on ${figure} is winner`);
+    } else if (map[1] == figure && map[4] ==  figure && map[7] ==  figure) {
+        console.log(`${player.name} on ${figure} is winner`);
+    } else if (map[2] == figure && map[5] ==  figure && map[8] ==  figure) {
+        console.log(`${player.name} on ${figure} is winner`);
+    } else if (map[0] == figure && map[4] ==  figure && map[8] ==  figure) {
+        console.log(`${player.name} on ${figure} is winner`);
+    } else if (map[2] == figure && map[4] ==  figure && map[6] ==  figure) {
+        console.log(`${player.name} on ${figure} is winner`);
+    } else {
+        changeUser();
+    }
 }
 
 canvas.addEventListener('mouseup', function(evt) {
     let mousePos = getMousePos(canvas, evt);
-    let message = 'Mouse position: ' + mousePos.x + ',' + mousePos.y;
-    //console.info(canvas, message);
 
     let promise = new Promise(function(resolve, reject){
         resolve(detectCoord( mousePos.x,  mousePos.y));
     });
-    promise.then(result => {createFigure(result)}, false);
+    promise
+        .then(result => {createFigure(result)});
+
+
 }, false);
 
 

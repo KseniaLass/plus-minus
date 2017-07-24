@@ -28,6 +28,8 @@ let user2 = {
 
 let player = user1;
 
+let blockMap = false;
+
 createCells();
 ctx.strokeRect(0,0,300,300);
 
@@ -109,17 +111,18 @@ function changeUser() {
     }
 }
 function makeComputerStroke() {
-    let random = getRandomInArray(cell);
-    if(map[random] != undefined) {
-        while(map[random] == undefined) {
-            random = getRandomInArray(cell);
-        }
-    } else {
-        createFigure(random);
+    let random = getRandomInArray();
+    while(map[random] != undefined) {
+        random = getRandomInArray();
     }
+    blockMap = true;
+    setTimeout(function(){
+        createFigure(random);
+        blockMap = false;
+    }, 500);
 }
 
-function getRandomInArray(array) {
+function getRandomInArray() {
     return Math.floor(Math.random() * cell.length);
 }
 
@@ -140,6 +143,9 @@ function checkLine() {
 }
 
 canvas.addEventListener('mouseup', function(evt) {
+    if(blockMap) {
+        return false;
+    }
     let mousePos = getMousePos(canvas, evt);
 
     let promise = new Promise(function(resolve, reject){

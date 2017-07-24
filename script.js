@@ -136,7 +136,8 @@ function checkLine() {
         || map[2] == figure && map[5] ==  figure && map[8] ==  figure
         || map[0] == figure && map[4] ==  figure && map[8] ==  figure
         || map[2] == figure && map[4] ==  figure && map[6] ==  figure) {
-        console.log(`${player.name} on ${figure} is winner`);
+        blockMap = true;
+        alert(`${player.name} on ${figure} is winner`);
     } else {
         changeUser();
     }

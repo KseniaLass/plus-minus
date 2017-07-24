@@ -17,11 +17,13 @@ let map = [];
 
 let user1 = {
     'name': 'User1',
-    'figure': 'cross'
+    'figure': 'cross',
+    'player': 'user'
 };
 let user2 = {
     'name': 'User2',
-    'figure': 'nought'
+    'figure': 'nought',
+    'player': 'computer'
 };
 
 let player = user1;
@@ -85,36 +87,52 @@ function createFigure(index) {
     let currentX = cell[index][0],
         currentY = cell[index][1];
 
-    if(player.figure == 'cross') {
-        createCross(currentX, currentY);
-        map[index] = 'cross';
-
+    if(cell[index][2] === 'block') {
+        return false
     } else {
-        createNought(currentX, currentY);
-        map[index] = 'nought';
+        if(player.figure == 'cross') {
+            createCross(currentX, currentY);
+            map[index] = 'cross';
+
+        } else {
+            createNought(currentX, currentY);
+            map[index] = 'nought';
+        }
+        checkLine();
+        cell[index].push('block');
     }
-    checkLine();
 }
-function changeUser(currentUser) {
+function changeUser() {
     player = player == user1 ? user2 : user1;
+    if(player['player'] == 'computer') {
+        makeComputerStroke();
+    }
 }
+function makeComputerStroke() {
+    let random = getRandomInArray(cell);
+    if(map[random] != undefined) {
+        while(map[random] == undefined) {
+            random = getRandomInArray(cell);
+        }
+    } else {
+        createFigure(random);
+    }
+}
+
+function getRandomInArray(array) {
+    return Math.floor(Math.random() * cell.length);
+}
+
 function checkLine() {
     let figure = player.figure;
-    if (map[0] == figure && map[1] ==  figure && map[2] ==  figure) {
-        console.log(`${player.name} on ${figure} is winner`);
-    } else if (map[3] == figure && map[4] ==  figure && map[5] ==  figure) {
-        console.log(`${player.name} on ${figure} is winner`);
-    } else if (map[6] == figure && map[7] ==  figure && map[8] ==  figure) {
-        console.log(`${player.name} on ${figure} is winner`);
-    } else if (map[0] == figure && map[3] ==  figure && map[6] ==  figure) {
-        console.log(`${player.name} on ${figure} is winner`);
-    } else if (map[1] == figure && map[4] ==  figure && map[7] ==  figure) {
-        console.log(`${player.name} on ${figure} is winner`);
-    } else if (map[2] == figure && map[5] ==  figure && map[8] ==  figure) {
-        console.log(`${player.name} on ${figure} is winner`);
-    } else if (map[0] == figure && map[4] ==  figure && map[8] ==  figure) {
-        console.log(`${player.name} on ${figure} is winner`);
-    } else if (map[2] == figure && map[4] ==  figure && map[6] ==  figure) {
+    if (map[0] == figure && map[1] ==  figure && map[2] ==  figure
+        || map[3] == figure && map[4] ==  figure && map[5] ==  figure
+        || map[6] == figure && map[7] ==  figure && map[8] ==  figure
+        || map[0] == figure && map[3] ==  figure && map[6] ==  figure
+        || map[1] == figure && map[4] ==  figure && map[7] ==  figure
+        || map[2] == figure && map[5] ==  figure && map[8] ==  figure
+        || map[0] == figure && map[4] ==  figure && map[8] ==  figure
+        || map[2] == figure && map[4] ==  figure && map[6] ==  figure) {
         console.log(`${player.name} on ${figure} is winner`);
     } else {
         changeUser();
@@ -130,8 +148,5 @@ canvas.addEventListener('mouseup', function(evt) {
     promise
         .then(result => {createFigure(result)});
 
-
 }, false);
-
-
 

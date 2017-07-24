@@ -143,10 +143,10 @@ function makeBotStrokeIntel() {
     var botChanceToWinner = checkHalfLine(user2.figure),
         userChanceToWinner = checkHalfLine(user1.figure);
 
-    if(botChanceToWinner && map[botChanceToWinner] == undefined) {
-        createFigure(botChanceToWinner);
-    } else if (userChanceToWinner && map[userChanceToWinner] == undefined) {
+    if (userChanceToWinner && map[userChanceToWinner] == undefined) {
         createFigure(userChanceToWinner);
+    } else if(botChanceToWinner && map[botChanceToWinner] == undefined) {
+        createFigure(botChanceToWinner);
     } else {
         if (map[4] == undefined) {
             createFigure(4);

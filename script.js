@@ -1,5 +1,6 @@
 const canvas = document.getElementById("draw");
 const ctx = canvas.getContext("2d");
+const reload = document.getElementById('reload');
 
 // Params
 let cell = [
@@ -15,33 +16,29 @@ let cell = [
 ];
 let map = [];
 
-let user1 = {
+const line = ['012', '345', '678', '036', '147', '258', '048', '246'];
+
+const user1 = {
     'name': 'User1',
     'figure': 'cross',
     'player': 'user'
 };
-let user2 = {
+const user2 = {
     'name': 'User2',
     'figure': 'nought',
-    'player': 'computer'
+    'player': 'bot'
 };
 
 let player = user1;
 
 let blockMap = false;
 
+// Create PlayGround
+
 createCells();
 ctx.strokeRect(0,0,300,300);
 
-function detectCoord(x, y) {
-    for(let i = 0; i < cell.length; i++) {
-        let cellX = cell[i][0],
-            cellY = cell[i][1];
-        if(x >= cellX && x <= cellX + 100 && y >= cellY && y <= cellY + 100) {
-            return i;
-        }
-    }
-}
+// Draw's function
 
 function createCells() {
     for(let i=0; i < cell.length; i++) {
@@ -76,16 +73,7 @@ function createNought(x, y) {
     ctx.arc(position.x, position.y, 40, 0, Math.PI*2);
     ctx.stroke();
 }
-
-function getMousePos(canvas, evt) {
-    let rect = canvas.getBoundingClientRect();
-    return {
-        x: evt.clientX - rect.left,
-        y: evt.clientY - rect.top
-    };
-}
 function createFigure(index) {
-
     let currentX = cell[index][0],
         currentY = cell[index][1];
 
@@ -104,13 +92,42 @@ function createFigure(index) {
         cell[index].push('block');
     }
 }
-function changeUser() {
-    player = player == user1 ? user2 : user1;
-    if(player['player'] == 'computer') {
-        makeComputerStroke();
+
+// Helpers
+
+function detectCoord(x, y) {
+    for(let i = 0; i < cell.length; i++) {
+        let cellX = cell[i][0],
+            cellY = cell[i][1];
+        if(x >= cellX && x <= cellX + 100 && y >= cellY && y <= cellY + 100) {
+            return i;
+        }
     }
 }
-function makeComputerStroke() {
+
+function getMousePos(canvas, evt) {
+    let rect = canvas.getBoundingClientRect();
+    return {
+        x: evt.clientX - rect.left,
+        y: evt.clientY - rect.top
+    };
+}
+
+function changeUser() {
+    player = player == user1 ? user2 : user1;
+    if(player['player'] == 'bot') {
+        //makeBotStrokeRandom();
+        makeBotStrokeIntel();
+    }
+}
+
+function getRandomInArray() {
+    return Math.floor(Math.random() * cell.length);
+}
+
+// Bot Stroke
+
+function makeBotStrokeRandom() {
     let random = getRandomInArray();
     while(map[random] != undefined) {
         random = getRandomInArray();
@@ -122,12 +139,54 @@ function makeComputerStroke() {
     }, 500);
 }
 
-function getRandomInArray() {
-    return Math.floor(Math.random() * cell.length);
+function makeBotStrokeIntel() {
+    var botChanceToWinner = checkHalfLine(user2.figure),
+        userChanceToWinner = checkHalfLine(user1.figure);
+
+    if(botChanceToWinner && map[botChanceToWinner] == undefined) {
+        createFigure(botChanceToWinner);
+    } else if (userChanceToWinner && map[userChanceToWinner] == undefined) {
+        createFigure(userChanceToWinner);
+    } else {
+        if (map[4] == undefined) {
+            createFigure(4);
+        } else if (map[0] == undefined) {
+            createFigure(0);
+        } else if (map[2] == undefined) {
+            createFigure(2);
+        } else if (map[6] == undefined) {
+            createFigure(6);
+        } else if (map[8] == undefined) {
+            createFigure(8);
+        } else {
+            makeBotStrokeRandom();
+        }
+    }
+
+}
+
+
+// Check winner
+
+function checkHalfLine(figure) {
+    for(let i =0; i < line.length; i++) {
+        let first = line[i].substr(0, 1),
+            second = line[i].substr(1, 1),
+            thrid = line[i].substr(2, 1);
+        if(map[first] == figure && map[second] == figure) {
+            return thrid;
+        } else if (map[second] == figure && map[thrid] == figure) {
+            return first;
+        } else if (map[first] == figure && map[thrid] == figure) {
+            return second;
+        }
+    }
 }
 
 function checkLine() {
     let figure = player.figure;
+    let countOfFigure = map.filter(function(value) { return value !== undefined }).length;
+    console.log(countOfFigure);
     if (map[0] == figure && map[1] ==  figure && map[2] ==  figure
         || map[3] == figure && map[4] ==  figure && map[5] ==  figure
         || map[6] == figure && map[7] ==  figure && map[8] ==  figure
@@ -137,11 +196,31 @@ function checkLine() {
         || map[0] == figure && map[4] ==  figure && map[8] ==  figure
         || map[2] == figure && map[4] ==  figure && map[6] ==  figure) {
         blockMap = true;
-        alert(`${player.name} on ${figure} is winner`);
+        GameOver();
+    } else if (countOfFigure === 9) {
+        GameOver('draw');
     } else {
         changeUser();
     }
 }
+
+// Game Over
+
+function GameOver(draw) {
+    var result =  document.getElementById('result');
+    if(draw) {
+        result.innerHTML = 'DRAW!';
+    } else {
+        result.innerHTML = player.name + ' on ' + player.figure + ' is winner!!';
+    }
+    reload.style('display', 'block');
+}
+
+// Events
+
+reload.addEventListener('mouseup', function(){
+   location.reload()
+});
 
 canvas.addEventListener('mouseup', function(evt) {
     if(blockMap) {
